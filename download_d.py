@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # download_d Copyright © 2014 Lorenzo Mureu <mureulor@gmail.com>
 # 
 # This program is free software; you can redistribute it and/or
@@ -26,8 +28,8 @@ os.makedirs(ddir, exist_ok=True)
 print("Files saved in: " + ddir)
 
 # load html page
-URL_IMAGES=r'http://www.diochan.com/d/img.php?x=0&y=0&w=1000&h=1000&z=0'
-URL_BASE = r'http://www.diochan.com/d/'
+URL_IMAGES=r'http://www.diochan.com/d/img.php?x=0&y=0&w=4000000&h=4000000&z=0' # Changed w=h=1000 to w=h=4e6 in order to get all images
+URL_BASE = r'http://www.diochan.com/d/img/' # changed URL_BASE so we don't use img[src] that points to thumbnails! 
 o = request.urlopen(URL_IMAGES)
 # load DOM
 doc = lxml.html.document_fromstring(o.readall().decode())
@@ -36,16 +38,20 @@ imgs = doc.findall(".//img");
 
 print("{0} images found".format(len(imgs)))
 for img in imgs:
-    url = URL_BASE + img.attrib["src"] # img url
+    url = URL_BASE + img.attrib["id"]  # img url ; changed so it points to the full image and not the thumbnail
     bn = img.attrib["id"]              # file name
     fp = os.path.join(ddir, bn)        # file path
 
-    print ( "[{0}]...".format(fp))
-    
-    # download and save
-    f = open(fp, "wb")
-    o = request.urlopen(url)
-    f.write(o.read())
-    f.close()
-    print(".\n")
-print("Done.")
+    print ( "[{0}]...".format(fp), end="")
+
+    # download and save, but only if file does not exist already
+    try:
+        f = open(fp, "xb")
+        o = request.urlopen(url)
+        f.write(o.read())
+        f.close()
+        print("done")
+    except FileExistsError:
+        print("skipping, because file already existing!")
+
+print("\n\nMy job is done, enjoy onii-san~")
