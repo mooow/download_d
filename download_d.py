@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # 
 
-print("download_d Copyright © 2014 Lorenzo Mureu <mureulor@gmail.com>\n\n\n")
+print("download_d Copyright © 2014 Lorenzo Mureu <mureulor@gmail.com>\n\n")
 
 import os, lxml.html, urllib.request as request
 
@@ -36,13 +36,17 @@ doc = lxml.html.document_fromstring(o.readall().decode())
 # search all <img> tags
 imgs = doc.findall(".//img");
 
-print("{0} images found".format(len(imgs)))
+N_IMGS = len(imgs) # total number of images to be downloaded
+D_IMGS = 0         # number of downloaded images
+
+print("\n\n{0} images found\n\n".format(N_IMGS))
 for img in imgs:
     url = URL_BASE + img.attrib["id"]  # img url ; changed so it points to the full image and not the thumbnail
     bn = img.attrib["id"]              # file name
     fp = os.path.join(ddir, bn)        # file path
 
-    print ( "[{0}]...".format(fp), end="")
+    prog = D_IMGS/N_IMGS*100  # progress in %
+    print ( "{0:5.2f}% - {1}...".format(prog,fp), end="")
 
     # download and save, but only if file does not exist already
     try:
@@ -52,6 +56,8 @@ for img in imgs:
         f.close()
         print("done")
     except FileExistsError:
-        print("skipping, because file already existing!")
+        print("skipping, because file already exists!")
 
-print("\n\nMy job is done, enjoy onii-san~")
+    D_IMGS+=1 # increment number of downloaded images
+
+print("\n\nFinished.")
